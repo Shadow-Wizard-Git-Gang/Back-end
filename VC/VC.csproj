@@ -10,16 +10,14 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.Identity.MongoDbCore" Version="3.1.2" />
     <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.20" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Data\Repositories\IRepositories\" />
     <Folder Include="Helpers\Extensions\" />
-    <Folder Include="Helpers\Mapper\" />
-    <Folder Include="Services\IServices\" />
+    <Folder Include="Repositories\IRepositories\" />
   </ItemGroup>
 
 </Project>

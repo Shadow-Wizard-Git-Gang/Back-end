@@ -9,5 +9,8 @@ namespace VC.Models.Identity
     [CollectionName(SettingsStorage.CollectionNameForApplicationUser)]
     public class ApplicationUser : MongoIdentityUser<ObjectId>
     {
+        public string FullName { get; set; } = null!;
+        public int CompanyId { get; set; }
+        public bool IsOwner { get; set; }
     }
 }
