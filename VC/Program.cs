@@ -24,7 +24,10 @@ builder.Services.AddSingleton(mongoDbConfig);
 var mongoDbContext = new ApplicationMongoDbContext(mongoDbConfig);
 builder.Services.AddSingleton<IMongoDbContext>(mongoDbContext);
 
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+    })
     .AddMongoDbStores<IMongoDbContext>(mongoDbContext)
     .AddDefaultTokenProviders();
 
