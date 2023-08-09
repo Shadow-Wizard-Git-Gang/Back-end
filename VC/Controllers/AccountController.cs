@@ -23,11 +23,6 @@ namespace VC.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> SignInAsync([FromBody] UserSignInRequestDTO userSignInRequest)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
                 var response = await _accountService.SignInAsync(userSignInRequest);
@@ -45,5 +40,4 @@ namespace VC.Controllers
             }
         }
     }
-
 }
