@@ -27,7 +27,7 @@ namespace VC.Services
             _mapper = mapper;
         }
 
-        public async Task<UserSignInResponseDTO> SignInAsync(UserSignInRequestDTO userSignInRequest)
+        public async Task<UserSignInResponseDTO?> SignInAsync(UserSignInRequestDTO userSignInRequest)
         {
             var appUser = await _userManager.FindByEmailAsync(userSignInRequest.Email);
 
@@ -59,5 +59,4 @@ namespace VC.Services
             return userResponse;
         }
     }
-
 }
