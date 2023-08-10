@@ -33,14 +33,15 @@ namespace VC.Tests.Tests.Controllers
             _userServiceMock = new Mock<IUserService>();
             _userController = new UserController(_userServiceMock.Object);
         }
+
         [Fact]
-        public async Task SignInAsync_Returns201Created_WhenUserCreatedSuccessfully()
+        public async Task CreateUserAsync_Returns201Created_WhenUserCreatedSuccessfully()
         {
             // Arrange
             _userServiceMock.Setup(x => x.CreateUserAsync(_userCreateRequest)).ReturnsAsync(_user);
 
             // Act
-            var result = await _userController.SignInAsync(_userCreateRequest);
+            var result = await _userController.CreateUserAsync(_userCreateRequest);
 
             // Assert
             Assert.IsType<CreatedResult>(result);
@@ -48,13 +49,13 @@ namespace VC.Tests.Tests.Controllers
         }
 
         [Fact]
-        public async Task SignInAsync_Returns400BadRequest_WhenSignUpServiceExceptionThrown()
+        public async Task CreateUserAsync_Returns400BadRequest_WhenSignUpServiceExceptionThrown()
         {
             // Arrange
             _userServiceMock.Setup(x => x.CreateUserAsync(_userCreateRequest)).ThrowsAsync(new SignUpServiceException("Error"));
 
             // Act
-            var result = await _userController.SignInAsync(_userCreateRequest);
+            var result = await _userController.CreateUserAsync(_userCreateRequest);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
@@ -63,13 +64,13 @@ namespace VC.Tests.Tests.Controllers
         }
 
         [Fact]
-        public async Task SignInAsync_Returns500InternalServerError_WhenExceptionThrown()
+        public async Task CreateUserAsync_Returns500InternalServerError_WhenExceptionThrown()
         {
             // Arrange
             _userServiceMock.Setup(x => x.CreateUserAsync(_userCreateRequest)).ThrowsAsync(new Exception());
 
             // Act
-            var result = await _userController.SignInAsync(_userCreateRequest);
+            var result = await _userController.CreateUserAsync(_userCreateRequest);
 
             // Assert
             Assert.IsType<StatusCodeResult>(result);
