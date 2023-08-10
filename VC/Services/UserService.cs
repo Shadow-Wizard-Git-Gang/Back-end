@@ -35,7 +35,7 @@ namespace VC.Services
 
                 foreach (var error in result.Errors)
                 {
-                    sb.AppendLine(error.Description);
+                    sb.Append(error.Description + "\n");
                 }
 
                 throw new SignUpServiceException(sb.ToString());

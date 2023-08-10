@@ -20,25 +20,27 @@ namespace VC.Tests.Tests.Controllers
     public class UserControllerTests
     {
         private readonly User _user;
-        private readonly UserCreateRequestDTO _userSignUpRequest;
-        private readonly Mock<IUserService> _accountServiceMock;
+        private readonly UserCreateRequestDTO _userCreateRequest;
+
+        private readonly Mock<IUserService> _userServiceMock;
         private readonly UserController _userController;
 
         public UserControllerTests()
         {
             _user = TestDataHelper.CreateUser();
-            _userSignUpRequest = new UserCreateRequestDTO();
-            _accountServiceMock = new Mock<IUserService>();
-            _userController = new UserController(_accountServiceMock.Object);
+            _userCreateRequest = TestDataHelper.CreateUserCreateRequestDTO();
+
+            _userServiceMock = new Mock<IUserService>();
+            _userController = new UserController(_userServiceMock.Object);
         }
         [Fact]
         public async Task SignInAsync_Returns201Created_WhenUserCreatedSuccessfully()
         {
             // Arrange
-            _accountServiceMock.Setup(x => x.CreateUserAsync(_userSignUpRequest)).ReturnsAsync(_user);
+            _userServiceMock.Setup(x => x.CreateUserAsync(_userCreateRequest)).ReturnsAsync(_user);
 
             // Act
-            var result = await _userController.SignInAsync(_userSignUpRequest);
+            var result = await _userController.SignInAsync(_userCreateRequest);
 
             // Assert
             Assert.IsType<CreatedResult>(result);
@@ -49,10 +51,10 @@ namespace VC.Tests.Tests.Controllers
         public async Task SignInAsync_Returns400BadRequest_WhenSignUpServiceExceptionThrown()
         {
             // Arrange
-            _accountServiceMock.Setup(x => x.CreateUserAsync(_userSignUpRequest)).ThrowsAsync(new SignUpServiceException("Error"));
+            _userServiceMock.Setup(x => x.CreateUserAsync(_userCreateRequest)).ThrowsAsync(new SignUpServiceException("Error"));
 
             // Act
-            var result = await _userController.SignInAsync(_userSignUpRequest);
+            var result = await _userController.SignInAsync(_userCreateRequest);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
@@ -64,10 +66,10 @@ namespace VC.Tests.Tests.Controllers
         public async Task SignInAsync_Returns500InternalServerError_WhenExceptionThrown()
         {
             // Arrange
-            _accountServiceMock.Setup(x => x.CreateUserAsync(_userSignUpRequest)).ThrowsAsync(new Exception());
+            _userServiceMock.Setup(x => x.CreateUserAsync(_userCreateRequest)).ThrowsAsync(new Exception());
 
             // Act
-            var result = await _userController.SignInAsync(_userSignUpRequest);
+            var result = await _userController.SignInAsync(_userCreateRequest);
 
             // Assert
             Assert.IsType<StatusCodeResult>(result);

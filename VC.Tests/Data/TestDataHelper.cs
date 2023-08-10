@@ -1,5 +1,7 @@
-﻿using VC.Models;
+﻿using MongoDB.Driver;
+using VC.Models;
 using VC.Models.DTOs.AccountDTOs;
+using VC.Models.DTOs.UserDTOs;
 using VC.Models.Identity;
 
 namespace VC.Tests.Data
@@ -33,6 +35,27 @@ namespace VC.Tests.Data
             }
 
             return new UserSignInResponseDTO();
+        }
+
+        public static UserCreateRequestDTO CreateUserCreateRequestDTO(
+            string? username = null,
+            string? email = null,
+            string? password = null,
+            string? fullName = null,
+            int? companyId = null)
+        {
+            if (companyId != null)
+            {
+                return new UserCreateRequestDTO { 
+                    UserName = username,
+                    Email = email,
+                    Password = password,
+                    FullName = fullName,
+                    CompanyId = companyId.Value
+                };
+            }
+
+            return new UserCreateRequestDTO();
         }
 
         public static ApplicationUser CreateApplicationUser()
