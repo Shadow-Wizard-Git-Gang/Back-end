@@ -27,8 +27,8 @@ namespace VC.Controllers
             try
             {
                 var response = await _userService.CreateUserAsync(userSignUpRequest);
-                
-                return Created("",response);//TODO make URI
+
+                return Created("", response);//TODO make URI
             }
             catch (SignUpServiceException ex)
             {
@@ -40,4 +40,5 @@ namespace VC.Controllers
             }
         }
     }
+
 }
