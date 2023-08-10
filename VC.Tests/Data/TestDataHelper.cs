@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using AspNetCore.Identity.MongoDbCore.Models;
+using MongoDB.Driver;
 using VC.Models;
 using VC.Models.DTOs.AccountDTOs;
 using VC.Models.DTOs.UserDTOs;
@@ -58,8 +59,20 @@ namespace VC.Tests.Data
             return new UserCreateRequestDTO();
         }
 
-        public static ApplicationUser CreateApplicationUser()
+        public static ApplicationUser CreateApplicationUser(
+            string? userName = null, 
+            string? email = null, 
+            List<MongoClaim>? mongoClaims = null)
         {
+            if (mongoClaims != null)
+            {
+                return new ApplicationUser() { 
+                    UserName = userName,
+                    Email = email, 
+                    Claims = mongoClaims
+                };
+            }
+
             return new ApplicationUser();
         }
 
