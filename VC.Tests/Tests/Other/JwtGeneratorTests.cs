@@ -26,20 +26,18 @@ namespace VC.Tests.Tests.Other
         [Fact]
         public void CreateToken_ReturnsValidToken()
         {
+            // Arrange
+            var handler = new JwtSecurityTokenHandler();
+
             var mongoClaims = new List<MongoClaim> {
                     new MongoClaim(){ Type = "CanDelete", Value = "true" }
                 };
-
             var userName = "testUser";
             var email = "test@test.com";
-
-            // Arrange
             var user = TestDataHelper.CreateApplicationUser(userName, email, mongoClaims);
 
             // Act
             var token = _jwtGenerator.CreateToken(user);
-
-            var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(token);
 
             // Assert
