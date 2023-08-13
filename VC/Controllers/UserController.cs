@@ -39,6 +39,60 @@ namespace VC.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GetUserAsync(string id)
+        {
+            try
+            {
+                var response = await _userService.GetUserAsync(id);
+                if (response == null) return NotFound();
+                return Ok(response);
+            }
+            catch (FormatException)
+            {
+                return BadRequest();
+    }
+            catch (IndexOutOfRangeException)
+            {
+                return BadRequest();
+}
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> DeleteUser(string id)
+        {
+            try
+            {
+                var response = await _userService.DeleteUserAsync(id);
+                if (!response) return NotFound();
+                return NoContent();
+            }
+            catch (FormatException)
+            {
+                return BadRequest();
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return BadRequest();
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
     }
 
 }
