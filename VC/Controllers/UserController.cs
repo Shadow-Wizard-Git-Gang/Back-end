@@ -54,11 +54,11 @@ namespace VC.Controllers
             }
             catch (FormatException)
             {
-                return BadRequest();
+                return BadRequest("Wrong id format");
             }
             catch (IndexOutOfRangeException)
             {
-                return BadRequest();
+                return BadRequest("Wrong id format");
             }
             catch
             {
