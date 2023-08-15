@@ -49,8 +49,8 @@ namespace VC.Services
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) { return false; }
-            var appUser = _mapper.Map<User>(user);
-            await _userManager.DeleteAsync(user);
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded) return false;
             return true;
         }
 
@@ -62,6 +62,7 @@ namespace VC.Services
         public async Task<User> GetUserAsync(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
+            if (user == null) { return null; }
             var appUser = _mapper.Map<User>(user);
             return appUser;
         }

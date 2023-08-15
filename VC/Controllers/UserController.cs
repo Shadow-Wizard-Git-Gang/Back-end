@@ -55,11 +55,11 @@ namespace VC.Controllers
             catch (FormatException)
             {
                 return BadRequest();
-    }
+            }
             catch (IndexOutOfRangeException)
             {
                 return BadRequest();
-}
+            }
             catch
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
