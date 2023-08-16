@@ -10,20 +10,26 @@ namespace VC.Services
 {
     public class AccountService : IAccountService
     {
-        public SignInManager<ApplicationUser> _signInManager { get; }
+        private SignInManager<ApplicationUser> _signInManager { get; }
         private UserManager<ApplicationUser> _userManager { get; }
+        private IConfiguration _configuration { get; }
         private IJwtGenerator _jwtGenerator { get; }
-        public IMapper _mapper { get; }
+        private IEmailService _emailService { get; }
+        private IMapper _mapper { get; }
 
         public AccountService(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
+            IConfiguration configuration,
             IJwtGenerator jwtGenerator,
+            IEmailService emailService,
             IMapper mapper)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _configuration = configuration;
             _jwtGenerator = jwtGenerator;
+            _emailService = emailService;
             _mapper = mapper;
         }
 
@@ -36,27 +42,65 @@ namespace VC.Services
                 return null;
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(
-                appUser,
-                userSignInRequest.Password,
-                false);
-
-            if (!result.Succeeded)
+            if (appUser.EmailConfirmed)
             {
-                return null;
+                var result = await _signInManager.CheckPasswordSignInAsync(
+                    appUser,
+                    userSignInRequest.Password,
+                    false);
+
+                if (!result.Succeeded)
+                {
+                    return null;
+                }
+
+                var user = _mapper.Map<User>(appUser);
+
+                user.Password = userSignInRequest.Password;
+
+                var userResponse = new UserSignInResponseDTO
+                {
+                    User = user,
+                    Token = _jwtGenerator.CreateToken(appUser)
+                };
+
+                return userResponse;
             }
 
-            var user = _mapper.Map<User>(appUser);
+            return null;
+        }
 
-            user.Password = userSignInRequest.Password;
+        public async Task SendConfirmationLetterAsync(ApplicationUser applicationUser)
+        {
+            var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
 
-            var userResponse = new UserSignInResponseDTO
+            var confirmationLink = string.Format(
+                _configuration["URLToTheConfirmationPage"],
+                applicationUser.Id,
+                confirmationToken);
+
+            await _emailService.SendAsync(
+                _configuration["OrganizationEmail"],
+                applicationUser.Email,
+                "Please confirm your email",
+                $"Please click on this link to confirm your email address: {confirmationLink}");
+        }
+
+        public async Task<bool> ConfirmEmailAsync(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
             {
-                User = user,
-                Token = _jwtGenerator.CreateToken(appUser)
-            };
+                return false;
+            }
 
-            return userResponse;
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

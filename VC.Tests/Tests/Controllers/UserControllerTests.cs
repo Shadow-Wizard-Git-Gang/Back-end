@@ -27,8 +27,8 @@ namespace VC.Tests.Tests.Controllers
 
         public UserControllerTests()
         {
-            _user = TestDataHelper.CreateUser();
-            _userCreateRequest = TestDataHelper.CreateUserCreateRequestDTO();
+            _user = new User();
+            _userCreateRequest = new UserCreateRequestDTO();
 
             _userServiceMock = new Mock<IUserService>();
             _userController = new UserController(_userServiceMock.Object);

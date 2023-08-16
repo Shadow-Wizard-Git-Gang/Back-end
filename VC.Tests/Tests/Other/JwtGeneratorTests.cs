@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using VC.Helpers.JWT;
+using VC.Models.Identity;
 using VC.Tests.Data;
 using Xunit;
 
@@ -34,7 +35,11 @@ namespace VC.Tests.Tests.Other
                 };
             var userName = "testUser";
             var email = "test@test.com";
-            var user = TestDataHelper.CreateApplicationUser(userName, email, mongoClaims);
+            var user = new ApplicationUser { 
+                UserName = userName, 
+                Email = email, 
+                Claims = mongoClaims 
+            };
 
             // Act
             var token = _jwtGenerator.CreateToken(user);

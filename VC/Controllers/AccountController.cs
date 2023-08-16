@@ -16,7 +16,7 @@ namespace VC.Controllers
             _accountService = accountService;
         }
 
-        [HttpPost]
+        [HttpPost("signIn")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -33,6 +33,29 @@ namespace VC.Controllers
                 }
 
                 return Ok(response);
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPost("confirmEmail")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> ConfirmEmailAsync([FromBody] UserConfirmationEmailRequest userConfirmationEmailRequest)
+        {
+            try
+            {
+                if (await _accountService.ConfirmEmailAsync(
+                userConfirmationEmailRequest.UserId,
+                userConfirmationEmailRequest.Token))
+                {
+                    return Ok();
+                }
+
+                return BadRequest();
             }
             catch
             {

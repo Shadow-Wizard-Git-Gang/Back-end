@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using System.Text;
 using VC.Helpers.Exceptions;
-using VC.Helpers.JWT;
 using VC.Models;
 using VC.Models.DTOs.UserDTOs;
 using VC.Models.Identity;
@@ -13,13 +12,16 @@ namespace VC.Services
     public class UserService : IUserService
     {
         private UserManager<ApplicationUser> _userManager { get; }
-        public IMapper _mapper { get; }
+        private IAccountService _accountService { get; }
+        private IMapper _mapper { get; }
 
         public UserService(
             UserManager<ApplicationUser> userManager,
+            IAccountService accountService,
             IMapper mapper)
         {
             _userManager = userManager;
+            _accountService = accountService;
             _mapper = mapper;
         }
 
@@ -39,6 +41,17 @@ namespace VC.Services
                 }
 
                 throw new SignUpServiceException(sb.ToString());
+            }
+
+            try
+            {
+                await _accountService.SendConfirmationLetterAsync(appUser);
+            }
+            catch
+            {
+                await _userManager.DeleteAsync(appUser);
+
+                throw new SignUpServiceException("Problem with sending confirmation letter");
             }
 
             return _mapper.Map<User>(appUser);

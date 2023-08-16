@@ -8,6 +8,7 @@ using VC.Models;
 using VC.Services;
 using Xunit;
 using VC.Tests.Data;
+using VC.Services.IServices;
 
 namespace VC.Tests.Tests.Services
 {
@@ -16,6 +17,7 @@ namespace VC.Tests.Tests.Services
         private readonly UserService _userService;
         private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IAccountService> _accountServiceMock;
 
         private readonly UserCreateRequestDTO _userCreateRequest;
         private readonly ApplicationUser _appUser;
@@ -25,30 +27,48 @@ namespace VC.Tests.Tests.Services
         {
             _userManagerMock = MockingHelpers.CreateUserManagerMock();
             _mapperMock = new Mock<IMapper>();
-            _userService = new UserService(_userManagerMock.Object, _mapperMock.Object);
+            _accountServiceMock = new Mock<IAccountService>();
+            _userService = new UserService(_userManagerMock.Object, _accountServiceMock.Object, _mapperMock.Object);
 
-            _userCreateRequest = TestDataHelper.CreateUserCreateRequestDTO();
-            _appUser = TestDataHelper.CreateApplicationUser();
-            _user = TestDataHelper.CreateUser();
+            _userCreateRequest = new UserCreateRequestDTO { 
+                Email = "test@test.com", 
+                Password = "123456" 
+            };
+            _appUser = new ApplicationUser { 
+                Email = _userCreateRequest.Email
+            };
+            _user = new User { 
+                Email = _userCreateRequest.Email 
+            };
         }
 
         [Fact]
-        public async Task CreateUserAsync_ReturnUser_WhenUserIsCreatedSuccessfully()
+        public async Task CreateUserAsync_ReturnUserAndSendConfirmationLetter_WhenUserIsCreatedSuccessfully()
         {
             // Arrange
-            _mapperMock.Setup(x => x.Map<ApplicationUser>(_userCreateRequest)).Returns(_appUser);
-            _userManagerMock.Setup(x => x.CreateAsync(_appUser, _userCreateRequest.Password)).ReturnsAsync(IdentityResult.Success);
-            _mapperMock.Setup(x => x.Map<User>(_appUser)).Returns(_user);
+
+            _userManagerMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+            _accountServiceMock.Setup(x => x.SendConfirmationLetterAsync(It.IsAny<ApplicationUser>()))
+                .Returns(Task.CompletedTask);
+            _mapperMock.Setup(x => x.Map<ApplicationUser>(It.IsAny<UserCreateRequestDTO>()))
+                .Returns(_appUser);
+            _mapperMock.Setup(x => x.Map<User>(It.IsAny<ApplicationUser>()))
+                .Returns(_user);
 
             // Act
             var result = await _userService.CreateUserAsync(_userCreateRequest);
 
             // Assert
-            Assert.Equal(_user, result);
+            Assert.Equal(_user.Email, result.Email);
+            _userManagerMock.Verify(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once);
+            _accountServiceMock.Verify(x => x.SendConfirmationLetterAsync(It.IsAny<ApplicationUser>()), Times.Once);
+            _mapperMock.Verify(x => x.Map<ApplicationUser>(It.IsAny<UserCreateRequestDTO>()), Times.Once);
+            _mapperMock.Verify(x => x.Map<User>(It.IsAny<ApplicationUser>()), Times.Once);
         }
 
         [Fact]
-        public async Task CreateUserAsync_ReturnThrowSignUpServiceException_WhenUserIsNotCreatedSuccessfully()
+        public async Task CreateUserAsync_ThrowSignUpServiceException_WhenUserManagerCreateAsyncFailed()
         {
             // Arrange
             var errors = new List<IdentityError>
@@ -62,14 +82,45 @@ namespace VC.Tests.Tests.Services
                     Description = "Error 2"
                 }
             };
-            _mapperMock.Setup(x => x.Map<ApplicationUser>(_userCreateRequest)).Returns(_appUser);
-            _userManagerMock.Setup(x => x.CreateAsync(_appUser, _userCreateRequest.Password)).ReturnsAsync(IdentityResult.Failed(errors.ToArray()));
 
-            // Act
+            _userManagerMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(errors.ToArray()));
+            _mapperMock.Setup(x => x.Map<ApplicationUser>(It.IsAny<UserCreateRequestDTO>()))
+                .Returns(_appUser);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<SignUpServiceException>(() => _userService.CreateUserAsync(_userCreateRequest));
+            
+            Assert.Equal("Error 1\nError 2\n", exception.Message);
+
+            _userManagerMock.Verify(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once);
+            _accountServiceMock.Verify(x => x.SendConfirmationLetterAsync(It.IsAny<ApplicationUser>()), Times.Never);
+            _mapperMock.Verify(x => x.Map<ApplicationUser>(It.IsAny<UserCreateRequestDTO>()), Times.Once);
+            _mapperMock.Verify(x => x.Map<User>(It.IsAny<ApplicationUser>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CreateUserAsync_ThrowSignUpServiceException_WhenAccountServiceSendConfirmationLetterAsyncFailed()
+        {
+            // Arrange
+            _userManagerMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+            _userManagerMock.Setup(x => x.DeleteAsync(It.IsAny<ApplicationUser>()));
+            _accountServiceMock.Setup(x => x.SendConfirmationLetterAsync(It.IsAny<ApplicationUser>()))
+                .Throws<Exception>();
+            _mapperMock.Setup(x => x.Map<ApplicationUser>(It.IsAny<UserCreateRequestDTO>()))
+                .Returns(_appUser);
+
+            // Act & Assert
             var exception = await Assert.ThrowsAsync<SignUpServiceException>(() => _userService.CreateUserAsync(_userCreateRequest));
 
-            // Assert
-            Assert.Equal("Error 1\nError 2\n", exception.Message);
+            Assert.Equal("Problem with sending confirmation letter", exception.Message);
+
+            _userManagerMock.Verify(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once);
+            _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Once);
+            _accountServiceMock.Verify(x => x.SendConfirmationLetterAsync(It.IsAny<ApplicationUser>()), Times.Once);
+            _mapperMock.Verify(x => x.Map<ApplicationUser>(It.IsAny<UserCreateRequestDTO>()), Times.Once);
+            _mapperMock.Verify(x => x.Map<User>(It.IsAny<ApplicationUser>()), Times.Never);
         }
 
     }
