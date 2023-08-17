@@ -54,22 +54,32 @@ namespace VC.Services
             return true;
         }
 
-        public Task<User> EditUserAsync(string id, User user)
+        public Task<User> UpdateUserAsync(string id, User user)
         {
             throw new NotImplementedException();
         }
 
         public async Task<User> GetUserAsync(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null) { return null; }
-            var appUser = _mapper.Map<User>(user);
-            return appUser;
+            var appUser = await _userManager.FindByIdAsync(id);
+            if (appUser == null) { return null; }
+            var user = _mapper.Map<User>(appUser);
+            return user;
         }
 
-        public Task<IEnumerable<User>> GetUsersAsync()
+        public async Task<IEnumerable<User>> GetUsersAsync(int page, int limit)
         {
-            throw new NotImplementedException();
+            int startIndex = (page - 1) * limit;
+            int endIndex = startIndex + limit;
+
+            var appUsers = _userManager.Users
+                .Skip(startIndex)
+                .Take(endIndex)
+                .ToList();
+
+            var users = _mapper.Map<List<User>>(appUsers);
+
+            return users;
         }
     }
 }

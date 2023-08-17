@@ -93,6 +93,29 @@ namespace VC.Controllers
             }
         }
 
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GetUsersAsync(int page, int limit)
+        {
+            if (page <= 0 || limit <= 0)
+            {
+                return BadRequest("Page and limit must be greater than zero.");
+            }
+
+            try
+            {
+                var result = await _userService.GetUsersAsync(page, limit);
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+        }
     }
 
 }
