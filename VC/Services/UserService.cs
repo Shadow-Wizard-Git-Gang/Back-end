@@ -44,9 +44,14 @@ namespace VC.Services
             return _mapper.Map<User>(appUser);
         }
 
-        public Task<bool> DeleteUserAsync(string id)
+        public async Task<bool> DeleteUserAsync(string id)
         {
-            throw new NotImplementedException();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) { return false; }
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded) return false;
+            return true;
         }
 
         public Task<User> EditUserAsync(string id, User user)
@@ -54,9 +59,12 @@ namespace VC.Services
             throw new NotImplementedException();
         }
 
-        public Task<User> GetUserAsync(string id)
+        public async Task<User> GetUserAsync(string id)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) { return null; }
+            var appUser = _mapper.Map<User>(user);
+            return appUser;
         }
 
         public Task<IEnumerable<User>> GetUsersAsync()
