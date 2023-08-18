@@ -8,7 +8,7 @@ namespace VC.Services.IServices
         public Task<IEnumerable<User>> GetUsersAsync(int page, int limit);
         public Task<User> GetUserAsync(string id);
         public Task<bool> DeleteUserAsync(string id);
-        public Task<User> UpdateUserAsync(string id, User user);
+        public Task<User> UpdateUserAsync(string id, UserUpdateRequestDTO user);
         public Task<User> CreateUserAsync(UserCreateRequestDTO user);
     }
 }

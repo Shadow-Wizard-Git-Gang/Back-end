@@ -10,6 +10,7 @@ namespace VC.Helpers.Mapper
         public MappingConfig() { 
             CreateMap<ApplicationUser, User>().ReverseMap();
             CreateMap<ApplicationUser, UserCreateRequestDTO>().ReverseMap();
+            CreateMap<ApplicationUser, UserUpdateRequestDTO>().ReverseMap();
         }
     }
 }

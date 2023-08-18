@@ -46,7 +46,6 @@ namespace VC.Services
 
         public async Task<bool> DeleteUserAsync(string id)
         {
-
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) { return false; }
             var result = await _userManager.DeleteAsync(user);
@@ -54,9 +53,27 @@ namespace VC.Services
             return true;
         }
 
-        public Task<User> UpdateUserAsync(string id, User user)
+        public async Task<User> UpdateUserAsync(string id, UserUpdateRequestDTO userRequest)
         {
-            throw new NotImplementedException();
+            var appUser = await _userManager.FindByIdAsync(id);
+
+            if (appUser == null)
+            {
+                return null;
+            }
+
+            _mapper.Map(userRequest, appUser);
+
+            var result = await _userManager.UpdateAsync(appUser);
+
+            if (!result.Succeeded)
+            {
+                return null;
+            }
+
+            var user = _mapper.Map<User>(appUser);
+
+            return user;
         }
 
         public async Task<User> GetUserAsync(string id)
