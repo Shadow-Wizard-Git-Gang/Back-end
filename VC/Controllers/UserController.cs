@@ -93,6 +93,51 @@ namespace VC.Controllers
             }
         }
 
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GetUsersAsync(int page, int limit)
+        {
+            if (page <= 0 || limit <= 0)
+            {
+                return BadRequest("Page and limit must be greater than zero.");
+            }
+
+            try
+            {
+                var result = await _userService.GetUsersAsync(page, limit);
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateUserAsync(string id, [FromBody] UserUpdateRequestDTO userUpdateRequest)
+        {
+            try
+            {
+                var result = await _userService.UpdateUserAsync(id, userUpdateRequest);
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
     }
 
 }
