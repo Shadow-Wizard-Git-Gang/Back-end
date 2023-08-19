@@ -39,6 +39,105 @@ namespace VC.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GetUserAsync(string id)
+        {
+            try
+            {
+                var response = await _userService.GetUserAsync(id);
+                if (response == null) return NotFound();
+                return Ok(response);
+            }
+            catch (FormatException)
+            {
+                return BadRequest("Wrong id format");
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return BadRequest("Wrong id format");
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> DeleteUser(string id)
+        {
+            try
+            {
+                var response = await _userService.DeleteUserAsync(id);
+                if (!response) return NotFound();
+                return NoContent();
+            }
+            catch (FormatException)
+            {
+                return BadRequest();
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return BadRequest();
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GetUsersAsync(int page, int limit)
+        {
+            if (page <= 0 || limit <= 0)
+            {
+                return BadRequest("Page and limit must be greater than zero.");
+            }
+
+            try
+            {
+                var result = await _userService.GetUsersAsync(page, limit);
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateUserAsync(string id, [FromBody] UserUpdateRequestDTO userUpdateRequest)
+        {
+            try
+            {
+                var result = await _userService.UpdateUserAsync(id, userUpdateRequest);
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
     }
 
 }

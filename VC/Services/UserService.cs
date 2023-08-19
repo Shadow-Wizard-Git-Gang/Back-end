@@ -44,24 +44,59 @@ namespace VC.Services
             return _mapper.Map<User>(appUser);
         }
 
-        public Task<bool> DeleteUserAsync(string id)
+        public async Task<bool> DeleteUserAsync(string id)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) { return false; }
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded) return false;
+            return true;
         }
 
-        public Task<User> EditUserAsync(string id, User user)
+        public async Task<User> UpdateUserAsync(string id, UserUpdateRequestDTO userRequest)
         {
-            throw new NotImplementedException();
+            var appUser = await _userManager.FindByIdAsync(id);
+
+            if (appUser == null)
+            {
+                return null;
+            }
+
+            _mapper.Map(userRequest, appUser);
+
+            var result = await _userManager.UpdateAsync(appUser);
+
+            if (!result.Succeeded)
+            {
+                return null;
+            }
+
+            var user = _mapper.Map<User>(appUser);
+
+            return user;
         }
 
-        public Task<User> GetUserAsync(string id)
+        public async Task<User> GetUserAsync(string id)
         {
-            throw new NotImplementedException();
+            var appUser = await _userManager.FindByIdAsync(id);
+            if (appUser == null) { return null; }
+            var user = _mapper.Map<User>(appUser);
+            return user;
         }
 
-        public Task<IEnumerable<User>> GetUsersAsync()
+        public async Task<IEnumerable<User>> GetUsersAsync(int page, int limit)
         {
-            throw new NotImplementedException();
+            int startIndex = (page - 1) * limit;
+            int endIndex = startIndex + limit;
+
+            var appUsers = _userManager.Users
+                .Skip(startIndex)
+                .Take(endIndex)
+                .ToList();
+
+            var users = _mapper.Map<List<User>>(appUsers);
+
+            return users;
         }
     }
 }
