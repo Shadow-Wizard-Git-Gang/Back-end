@@ -12,16 +12,16 @@ namespace VC.Services
     public class UserService : IUserService
     {
         private UserManager<ApplicationUser> _userManager { get; }
-        private IAccountService _accountService { get; }
+        public IEmailService _emailService { get; }
         private IMapper _mapper { get; }
 
         public UserService(
             UserManager<ApplicationUser> userManager,
-            IAccountService accountService,
+            IEmailService emailService,
             IMapper mapper)
         {
             _userManager = userManager;
-            _accountService = accountService;
+            _emailService = emailService;
             _mapper = mapper;
         }
 
@@ -40,40 +40,35 @@ namespace VC.Services
                     sb.Append(error.Description + "\n");
                 }
 
-                throw new SignUpServiceException(sb.ToString());
+                throw new AppException(sb.ToString());
             }
 
             try
             {
-                await _accountService.SendConfirmationLetterAsync(appUser);
+                await _emailService.SendConfirmationLetterAsync(
+                    appUser.Id.ToString(), 
+                    appUser.Email, 
+                    await _userManager.GenerateEmailConfirmationTokenAsync(appUser));
             }
             catch
             {
-                await _userManager.DeleteAsync(appUser);
-
-                throw new SignUpServiceException("Problem with sending confirmation letter");
+                await _userManager.DeleteAsync(appUser);    //TODO Remove 
+                throw;
             }
 
             return _mapper.Map<User>(appUser);
         }
 
-        public async Task<bool> DeleteUserAsync(string id)
+        public async Task DeleteUserAsync(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null) { return false; }
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded) return false;
-            return true;
+            var appUser = await GetAppUserAsync(id);
+
+            await _userManager.DeleteAsync(appUser);
         }
 
         public async Task<User> UpdateUserAsync(string id, UserUpdateRequestDTO userRequest)
         {
-            var appUser = await _userManager.FindByIdAsync(id);
-
-            if (appUser == null)
-            {
-                return null;
-            }
+            var appUser = await GetAppUserAsync(id);
 
             _mapper.Map(userRequest, appUser);
 
@@ -81,20 +76,17 @@ namespace VC.Services
 
             if (!result.Succeeded)
             {
-                return null;
+                throw new AppException();
             }
 
-            var user = _mapper.Map<User>(appUser);
-
-            return user;
+            return _mapper.Map<User>(appUser);
         }
 
         public async Task<User> GetUserAsync(string id)
         {
-            var appUser = await _userManager.FindByIdAsync(id);
-            if (appUser == null) { return null; }
-            var user = _mapper.Map<User>(appUser);
-            return user;
+            var appUser = await GetAppUserAsync(id);
+
+            return _mapper.Map<User>(appUser);
         }
 
         public async Task<IEnumerable<User>> GetUsersAsync(int page, int limit)
@@ -107,9 +99,21 @@ namespace VC.Services
                 .Take(endIndex)
                 .ToList();
 
-            var users = _mapper.Map<List<User>>(appUsers);
+            return _mapper.Map<List<User>>(appUsers);
+        }
 
-            return users;
+        // helper methods
+
+        private async Task<ApplicationUser> GetAppUserAsync(string id)
+        {
+            var appUser = await _userManager.FindByIdAsync(id);
+
+            if (appUser == null)
+            {
+                throw new UserNotFoundException("User not found");
+            }
+
+            return appUser;
         }
     }
 }

@@ -5,9 +5,9 @@ namespace VC.Models.DTOs.AccountDTOs
     public class UserConfirmationEmailRequest
     {
         [Required]
-        public string UserId { get; set; } = null!;
+        public string UserId { get; set; }
 
         [Required]
-        public string Token { get; set; } = null!;
+        public string Token { get; set; }
     }
 }

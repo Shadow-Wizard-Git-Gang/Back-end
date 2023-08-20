@@ -27,4 +27,9 @@
     <ProjectReference Include="..\VC\VC.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Tests\Controllers\" />
+    <Folder Include="Tests\Services\" />
+  </ItemGroup>
+
 </Project>

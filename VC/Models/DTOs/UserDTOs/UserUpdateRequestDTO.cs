@@ -6,10 +6,10 @@ namespace VC.Models.DTOs.UserDTOs
     public class UserUpdateRequestDTO
     {
         [Required]
-        public string UserName { get; set; } = null!;
+        public string UserName { get; set; }
 
         [Required]
-        public string FullName { get; set; } = null!;
+        public string FullName { get; set; }
 
         [Required]
         public int CompanyId { get; set; }
@@ -18,6 +18,6 @@ namespace VC.Models.DTOs.UserDTOs
         public bool IsOwner { get; set; }
 
         [Required]
-        public List<Claim> Claims { get; set; } = null!;
+        public List<Claim> Claims { get; set; }
     }
 }

@@ -16,51 +16,31 @@ namespace VC.Controllers
             _accountService = accountService;
         }
 
-        [HttpPost("signIn")]
+        [HttpPost(SettingsStorage.EndpointNameForSignIn)]    //TODO place in the settings storage
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> SignInAsync([FromBody] UserSignInRequestDTO userSignInRequest)
         {
-            try
-            {
                 var response = await _accountService.SignInAsync(userSignInRequest);
-
-                if (response == null)
-                {
-                    return Unauthorized("Invalid Email or Password");
-                }
-
                 return Ok(response);
-            }
-            catch
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
         }
 
-        [HttpPost("confirmEmail")]
+        [HttpPost(SettingsStorage.EndpointNameForConfirmEmail)]  //TODO place in the settings storage
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> ConfirmEmailAsync([FromBody] UserConfirmationEmailRequest userConfirmationEmailRequest)
         {
-            try
+            if (await _accountService.ConfirmEmailAsync(
+            userConfirmationEmailRequest.UserId,
+            userConfirmationEmailRequest.Token))
             {
-                if (await _accountService.ConfirmEmailAsync(
-                userConfirmationEmailRequest.UserId,
-                userConfirmationEmailRequest.Token))
-                {
-                    return Ok();
-                }
+                return Ok();
+            }
 
-                return BadRequest();
-            }
-            catch
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            return BadRequest();
         }
     }
 }

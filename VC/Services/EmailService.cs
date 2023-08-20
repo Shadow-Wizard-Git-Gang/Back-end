@@ -3,19 +3,23 @@ using System.Net;
 using VC.Services.IServices;
 using Microsoft.Extensions.Options;
 using VC.Data;
+using Microsoft.AspNetCore.Identity;
+using VC.Models.Identity;
 
 namespace VC.Services
 {
     public class EmailService : IEmailService
     {
+        private IConfiguration _configuration { get; }
         private readonly IOptions<SmtpSettings> _smtpSettings;
 
-        public EmailService(IOptions<SmtpSettings> smtpSetting)
+        public EmailService(IConfiguration configuration, IOptions<SmtpSettings> smtpSetting)
         {
+            _configuration = configuration;
             _smtpSettings = smtpSetting;
         }
 
-        public async Task SendAsync(string from, string to, string subject, string body)
+        private async Task SendAsync(string from, string to, string subject, string body)
         {
             var message = new MailMessage(from, to, subject, body);
 
@@ -27,6 +31,20 @@ namespace VC.Services
 
                 await emailClient.SendMailAsync(message);
             }
+        }
+
+        public async Task SendConfirmationLetterAsync(string id, string email, string confirmationToken)
+        {
+            var confirmationLink = string.Format(
+                _configuration["URLToTheConfirmationPage"],
+                id,
+                confirmationToken);
+
+            await SendAsync(
+                _configuration["OrganizationEmail"],
+                email,
+                "Please confirm your email",
+                $"Please click on this link to confirm your email address: {confirmationLink}");
         }
     }
 }

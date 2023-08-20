@@ -5,16 +5,16 @@ namespace VC.Models.DTOs.UserDTOs
     public class UserCreateRequestDTO
     {
         [Required]
-        public string UserName { get; set; } = null!;
+        public string UserName { get; set; }
 
         [Required]
-        public string Email { get; set; } = null!;
+        public string Email { get; set; }
 
         [Required]
-        public string Password { get; set; } = null!;
+        public string Password { get; set; }
 
         [Required]
-        public string FullName { get; set; } = null!;
+        public string FullName { get; set; }
 
         [Required]
         public int CompanyId { get; set; }
