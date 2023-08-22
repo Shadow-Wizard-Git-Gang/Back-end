@@ -9,10 +9,12 @@ namespace VC.Helpers.JWT
     public class JwtGenerator : IJwtGenerator
     {
         private readonly SymmetricSecurityKey _key;
+        public IConfiguration _config { get; }
 
         public JwtGenerator(IConfiguration config)
         {
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]));
+            _config = config;
         }
 
         public string CreateToken(ApplicationUser user)
@@ -24,7 +26,7 @@ namespace VC.Helpers.JWT
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(7),
+                Expires = DateTime.Now.AddDays(int.Parse(_config["JwtSettings:TokenLifetime"])),
                 SigningCredentials = credentials
             };
             var tokenHandler = new JwtSecurityTokenHandler();

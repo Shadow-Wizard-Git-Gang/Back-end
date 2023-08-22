@@ -43,18 +43,10 @@ namespace VC.Services
                 throw new AppException(sb.ToString());
             }
 
-            try
-            {
-                await _emailService.SendConfirmationLetterAsync(
-                    appUser.Id.ToString(), 
-                    appUser.Email, 
-                    await _userManager.GenerateEmailConfirmationTokenAsync(appUser));
-            }
-            catch
-            {
-                await _userManager.DeleteAsync(appUser);    //TODO Remove 
-                throw;
-            }
+            _emailService.SendConfirmationLetterAsync(
+                appUser.Id.ToString(),
+                appUser.Email,
+                await _userManager.GenerateEmailConfirmationTokenAsync(appUser));
 
             return _mapper.Map<User>(appUser);
         }

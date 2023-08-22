@@ -62,7 +62,7 @@ namespace VC.Services
                 return userResponse;
             }
 
-            throw new UnauthorizedException("Invalid Email or Password"); //TODO Maybe change this to another status code
+            throw new UnauthorizedException("Invalid Email or Password");
         }
 
         public async Task<bool> ConfirmEmailAsync(string userId, string token)

@@ -25,10 +25,11 @@ namespace VC.Controllers
         public async Task<ActionResult> CreateUserAsync([FromBody] UserCreateRequestDTO userSignUpRequest)
         {
             var response = await _userService.CreateUserAsync(userSignUpRequest);
-            return Created("", response);//TODO make URI
+            return CreatedAtAction(nameof(GetUserAsync), new { id = response.Id }, response);
         }
 
         [HttpGet("{id}")]
+        [ActionName(nameof(GetUserAsync))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

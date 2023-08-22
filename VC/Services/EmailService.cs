@@ -10,19 +10,21 @@ namespace VC.Services
 {
     public class EmailService : IEmailService
     {
+        private const int _delayBeforeSendingLetterInSeconds = 20;
+
         private IConfiguration _configuration { get; }
         private readonly IOptions<SmtpSettings> _smtpSettings;
+        private readonly ILogger _logger;
 
-        public EmailService(IConfiguration configuration, IOptions<SmtpSettings> smtpSetting)
+        public EmailService(IConfiguration configuration, IOptions<SmtpSettings> smtpSetting, ILogger<EmailService> logger)
         {
             _configuration = configuration;
             _smtpSettings = smtpSetting;
+            _logger = logger;
         }
 
-        private async Task SendAsync(string from, string to, string subject, string body)
+        private async Task SendAsync(MailMessage message)
         {
-            var message = new MailMessage(from, to, subject, body);
-
             using (var emailClient = new SmtpClient(_smtpSettings.Value.Host, _smtpSettings.Value.Port))
             {
                 emailClient.Credentials = new NetworkCredential(
@@ -40,11 +42,28 @@ namespace VC.Services
                 id,
                 confirmationToken);
 
-            await SendAsync(
-                _configuration["OrganizationEmail"],
-                email,
+            var message = new MailMessage(
+                _configuration["OrganizationEmail"], 
+                email, 
                 "Please confirm your email",
                 $"Please click on this link to confirm your email address: {confirmationLink}");
+
+            try
+            {
+                await SendAsync(message);
+            }
+            catch
+            {
+                await Task.Delay(_delayBeforeSendingLetterInSeconds * 1000);
+
+                try
+                {
+                    await SendAsync(message);
+                }
+                catch(Exception ex) {
+                    _logger.LogError(ex, ex.Message);
+                }
+            }
         }
     }
 }
