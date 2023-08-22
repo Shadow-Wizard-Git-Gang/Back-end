@@ -2,8 +2,8 @@
 {
     public class UserSignInResponseDTO
     {
-        public User User { get; set; } = null!;
+        public User User { get; set; }
 
-        public string Token { get; set; } = null!;
+        public string Token { get; set; }
     }
 }

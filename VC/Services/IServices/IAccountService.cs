@@ -6,9 +6,7 @@ namespace VC.Services.IServices
 {
     public interface IAccountService
     {
-        public Task<UserSignInResponseDTO?> SignInAsync(UserSignInRequestDTO userSignInRequest);
-
-        public Task SendConfirmationLetterAsync(ApplicationUser applicationUser);
+        public Task<UserSignInResponseDTO> SignInAsync(UserSignInRequestDTO userSignInRequest);
         public Task<bool> ConfirmEmailAsync(string userId, string token);
     }
 }

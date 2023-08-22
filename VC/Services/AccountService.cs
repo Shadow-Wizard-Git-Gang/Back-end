@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using VC.Helpers.Exceptions;
 using VC.Helpers.JWT;
 using VC.Models;
 using VC.Models.DTOs.AccountDTOs;
@@ -12,34 +13,28 @@ namespace VC.Services
     {
         private SignInManager<ApplicationUser> _signInManager { get; }
         private UserManager<ApplicationUser> _userManager { get; }
-        private IConfiguration _configuration { get; }
         private IJwtGenerator _jwtGenerator { get; }
-        private IEmailService _emailService { get; }
         private IMapper _mapper { get; }
 
         public AccountService(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
-            IConfiguration configuration,
             IJwtGenerator jwtGenerator,
-            IEmailService emailService,
             IMapper mapper)
         {
             _signInManager = signInManager;
             _userManager = userManager;
-            _configuration = configuration;
             _jwtGenerator = jwtGenerator;
-            _emailService = emailService;
             _mapper = mapper;
         }
 
-        public async Task<UserSignInResponseDTO?> SignInAsync(UserSignInRequestDTO userSignInRequest)
+        public async Task<UserSignInResponseDTO> SignInAsync(UserSignInRequestDTO userSignInRequest)
         {
             var appUser = await _userManager.FindByEmailAsync(userSignInRequest.Email);
 
             if (appUser == null)
             {
-                return null;
+                throw new UnauthorizedException("Invalid Email or Password");
             }
 
             if (appUser.EmailConfirmed)
@@ -51,7 +46,7 @@ namespace VC.Services
 
                 if (!result.Succeeded)
                 {
-                    return null;
+                    throw new UnauthorizedException("Invalid Email or Password");
                 }
 
                 var user = _mapper.Map<User>(appUser);
@@ -67,31 +62,16 @@ namespace VC.Services
                 return userResponse;
             }
 
-            return null;
-        }
-
-        public async Task SendConfirmationLetterAsync(ApplicationUser applicationUser)
-        {
-            var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
-
-            var confirmationLink = string.Format(
-                _configuration["URLToTheConfirmationPage"],
-                applicationUser.Id,
-                confirmationToken);
-
-            await _emailService.SendAsync(
-                _configuration["OrganizationEmail"],
-                applicationUser.Email,
-                "Please confirm your email",
-                $"Please click on this link to confirm your email address: {confirmationLink}");
+            throw new UnauthorizedException("Invalid Email or Password"); //TODO Maybe change this to another status code
         }
 
         public async Task<bool> ConfirmEmailAsync(string userId, string token)
         {
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
-                return false;
+                throw new UserNotFoundException("User not found");
             }
 
             var result = await _userManager.ConfirmEmailAsync(user, token);

@@ -4,6 +4,6 @@ namespace VC.Services.IServices
 {
     public interface IEmailService
     {
-        public Task SendAsync(string from, string to, string subject, string body);
+        public Task SendConfirmationLetterAsync(string id, string email, string confirmationToken);
     }
 }
