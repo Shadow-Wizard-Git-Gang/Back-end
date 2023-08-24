@@ -51,8 +51,6 @@ namespace VC.Services
 
                 var user = _mapper.Map<User>(appUser);
 
-                user.Password = userSignInRequest.Password;
-
                 var userResponse = new UserSignInResponseDTO
                 {
                     User = user,

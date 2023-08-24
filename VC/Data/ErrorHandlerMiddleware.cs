@@ -29,18 +29,16 @@ namespace VC.Data
 
                 switch (error)
                 {
-                    case AppException e:
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
-                        break;
-                    case UserNotFoundException e:
-                        response.StatusCode = (int)HttpStatusCode.NotFound;
-                        break;
-                    case UnauthorizedException e:
-                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                        break;
                     case FormatException:
                     case IndexOutOfRangeException:
+                    case AppException:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        break;
+                    case UserNotFoundException:
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        break;
+                    case UnauthorizedException:
+                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
                         break;
                     default:
                         _logger.LogError(error, error.Message);

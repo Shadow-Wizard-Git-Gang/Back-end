@@ -2,7 +2,7 @@
 
 namespace VC.Models.DTOs.AccountDTOs
 {
-    public class UserConfirmationEmailRequest
+    public class UserConfirmationEmailRequestDTO
     {
         [Required]
         public string UserId { get; set; }
