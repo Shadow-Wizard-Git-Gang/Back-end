@@ -42,5 +42,29 @@ namespace VC.Controllers
 
             return BadRequest();
         }
+
+        [HttpPost(SettingsStorage.EndpointNameForResettingPassword)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> ResetPassword(string email)
+        {
+            await _accountService.ResetPassword(email);
+            return Ok();
+        }
+
+        [HttpPost(SettingsStorage.EndpointNameForSettingNewPassword)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> SetNewPassword([FromBody] UserSettingNewPasswordRequestDTO userNewPasswordRequest)
+        {
+            await _accountService.SetNewPassword(
+                userNewPasswordRequest.UserId,
+                userNewPasswordRequest.Token,
+                userNewPasswordRequest.NewPassword);
+            return Ok();
+        }
     }
 }

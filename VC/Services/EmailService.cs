@@ -35,19 +35,8 @@ namespace VC.Services
             }
         }
 
-        public async Task SendConfirmationLetterAsync(string id, string email, string confirmationToken)
+        private async Task TryToSend(MailMessage message)
         {
-            var confirmationLink = string.Format(
-                _configuration["URLToTheConfirmationPage"],
-                id,
-                confirmationToken);
-
-            var message = new MailMessage(
-                _configuration["OrganizationEmail"], 
-                email, 
-                "Please confirm your email",
-                $"Please click on this link to confirm your email address: {confirmationLink}");
-
             try
             {
                 await SendAsync(message);
@@ -60,10 +49,44 @@ namespace VC.Services
                 {
                     await SendAsync(message);
                 }
-                catch(Exception ex) {
+                catch (Exception ex)
+                {
                     _logger.LogError(ex, ex.Message);
                 }
             }
+        }
+
+        public async Task SendConfirmationLetterAsync(string email, string id, string confirmationToken)
+        {
+            var confirmationLink = string.Format(
+                _configuration["URLToTheConfirmationPage"],
+                id,
+                confirmationToken);
+
+            var message = new MailMessage(
+                _configuration["OrganizationEmail"], 
+                email, 
+                "Please confirm your email",
+                $"Please click on this link to confirm your email address: {confirmationLink}");
+
+            await TryToSend(message);
+        }
+
+        public async Task SendPasswordResettingLetterAsync(string email, string id, string resettingToken)
+        {
+            var resettingLink = string.Format(
+                    _configuration["URLToTheResettingPasswordPage"],
+                    id,
+                    resettingToken
+                );
+
+            var message = new MailMessage(
+                _configuration["OrganizationEmail"],
+                email,
+                "Please reset your password",
+                $"Please click on this link to reset your password: {resettingLink}");
+
+            await TryToSend(message);
         }
     }
 }
