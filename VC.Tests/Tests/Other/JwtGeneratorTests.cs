@@ -18,7 +18,8 @@ namespace VC.Tests.Tests.Other
             _config = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
-                    {"JwtSettings:Key", "testKeytestKeytestKeytestKeytestKey"}
+                    {"JwtSettings:Key", "testKeytestKeytestKeytestKeytestKey"},
+                    { "JwtSettings:TokenLifetime", "7" }
                 })
                 .Build();
             _jwtGenerator = new JwtGenerator(_config);
