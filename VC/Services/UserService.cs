@@ -44,8 +44,8 @@ namespace VC.Services
             }
 
             _emailService.SendConfirmationLetterAsync(
-                appUser.Id.ToString(),
                 appUser.Email,
+                appUser.Id.ToString(),
                 await _userManager.GenerateEmailConfirmationTokenAsync(appUser));
 
             return _mapper.Map<User>(appUser);
