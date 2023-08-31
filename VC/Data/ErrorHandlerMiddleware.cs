@@ -33,7 +33,7 @@ namespace VC.Data
                 {
                     case FormatException:
                     case IndexOutOfRangeException:
-                    case AppException:
+                    case ApplicationException:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
                     case MongoWriteException:
