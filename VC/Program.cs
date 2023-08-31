@@ -37,6 +37,10 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddMongoDbStores<IMongoDbContext>(mongoDbContext)
     .AddDefaultTokenProviders();
 
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options => {
+    options.TokenLifespan = TimeSpan.FromHours(3);
+});
+
 builder.Services.AddAuthentication(options => 
     {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

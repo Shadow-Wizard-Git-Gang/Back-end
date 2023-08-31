@@ -31,22 +31,20 @@ namespace VC.Data
 
                 switch (error)
                 {
-                    case ApplicationException e:
+                    case FormatException:
+                    case IndexOutOfRangeException:
+                    case AppException:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
-                    case MongoWriteException e:
+                    case MongoWriteException:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         message = "Wrong data for interaction with the company";
                         break;
-                    case UserNotFoundException e:
+                    case UserNotFoundException:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
-                    case UnauthorizedException e:
+                    case UnauthorizedException:
                         response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                        break;
-                    case FormatException:
-                    case IndexOutOfRangeException:
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
                     default:
                         _logger.LogError(error, message);
