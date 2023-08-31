@@ -1,42 +1,40 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VC.Data;
-using VC.Helpers.Exceptions;
-using VC.Models.DTOs.AccountDTOs;
-using VC.Models.DTOs.UserDTOs;
+using VC.Models.DTOs.CompanyDTOs;
 using VC.Services.IServices;
 
 namespace VC.Controllers
 {
-    [Route(SettingsStorage.RouteNameForUserController)]
+    [Route(SettingsStorage.RouteNameForCompanyController)]
     [ApiController]
-    public class UserController : ControllerBase
+    public class CompanyController : ControllerBase
     {
-        private IUserService _userService { get; }
+        private ICompanyService _companyService { get; }
 
-        public UserController(IUserService userService)
+        public CompanyController(ICompanyService companyService)
         {
-            _userService = userService;
+            _companyService = companyService;
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> CreateUserAsync([FromBody] UserCreateRequestDTO createRequest)
+        public async Task<ActionResult> CreateCompanyAsync([FromBody] CompanyCreateRequestDTO createRequest)
         {
-            var response = await _userService.CreateUserAsync(createRequest);
-            return CreatedAtAction(nameof(GetUserAsync), new { id = response.Id }, response);
+            var response = await _companyService.CreateCompanyAsync(createRequest);
+            return CreatedAtAction(nameof(GetCompanyAsync), new { id = response.Id }, response);
         }
 
         [HttpGet("{id}")]
-        [ActionName(nameof(GetUserAsync))]
+        [ActionName(nameof(GetCompanyAsync))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> GetUserAsync(string id)
+        public async Task<ActionResult> GetCompanyAsync(string id)
         {
-            var response = await _userService.GetUserAsync(id);
+            var response = await _companyService.GetCompanyAsync(id);
             return Ok(response);
         }
 
@@ -44,14 +42,14 @@ namespace VC.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> GetUsersAsync(int page, int limit)
+        public async Task<ActionResult> GetCompaniesAsync(int page, int limit)
         {
             if (page <= 0 || limit <= 0)
             {
                 return BadRequest("Page and limit must be greater than zero.");
             }
 
-            var response = await _userService.GetUsersAsync(page, limit);
+            var response = await _companyService.GetCompaniesAsync(page, limit);
             return Ok(response);
         }
 
@@ -60,9 +58,9 @@ namespace VC.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> UpdateUserAsync(string id, [FromBody] UserUpdateRequestDTO updateRequest)
+        public async Task<ActionResult> UpdateCompanyAsync(string id, [FromBody] CompanyUpdateRequestDTO updateRequest)
         {
-            var response = await _userService.UpdateUserAsync(id, updateRequest);
+            var response = await _companyService.UpdateCompanyAsync(id, updateRequest);
             return Ok(response);
         }
 
@@ -71,9 +69,9 @@ namespace VC.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> DeleteUser(string id)
+        public async Task<ActionResult> DeleteCompanyAsync(string id)
         {
-            await _userService.DeleteUserAsync(id);
+            await _companyService.DeleteCompanyAsync(id);
             return NoContent();
         }
     }

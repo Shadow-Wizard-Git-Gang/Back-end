@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Net;
 using System.Text.Json;
 using VC.Helpers.Exceptions;
@@ -24,13 +25,18 @@ namespace VC.Data
             }
             catch (Exception error)
             {
+                var message = error?.Message;
                 var response = context.Response;
                 response.ContentType = "application/json";
 
                 switch (error)
                 {
-                    case AppException e:
+                    case ApplicationException e:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        break;
+                    case MongoWriteException e:
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        message = "Wrong data for interaction with the company";
                         break;
                     case UserNotFoundException e:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
@@ -43,14 +49,14 @@ namespace VC.Data
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
                     default:
-                        _logger.LogError(error, error.Message);
+                        _logger.LogError(error, message);
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         break;
                 }
 
                 if (response.StatusCode != (int)HttpStatusCode.InternalServerError)
                 {
-                    var result = JsonSerializer.Serialize(new { message = error?.Message });
+                    var result = JsonSerializer.Serialize(new { message = message });
                     await response.WriteAsync(result);
                 }
             }
