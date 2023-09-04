@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <Folder Include="Helpers\Extensions\" />
-    <Folder Include="Repositories\IRepositories\" />
   </ItemGroup>
 
 </Project>

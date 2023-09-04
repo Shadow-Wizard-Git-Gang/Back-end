@@ -9,6 +9,8 @@ using VC.Data;
 using VC.Helpers.JWT;
 using VC.Helpers.Mapper;
 using VC.Models.Identity;
+using VC.Repositories;
+using VC.Repositories.IRepositories;
 using VC.Services;
 using VC.Services.IServices;
 
@@ -65,8 +67,10 @@ builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<ICompanyService, CompanyService>();
 
 //Repositories
+builder.Services.AddTransient<ICompanyRepository, CompanyRepository>();
 
 // Configure the HTTP request pipeline.
 

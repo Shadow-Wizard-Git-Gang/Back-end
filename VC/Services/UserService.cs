@@ -25,11 +25,11 @@ namespace VC.Services
             _mapper = mapper;
         }
 
-        public async Task<User> CreateUserAsync(UserCreateRequestDTO user)
+        public async Task<User> CreateUserAsync(UserCreateRequestDTO createRequest)
         {
-            var appUser = _mapper.Map<ApplicationUser>(user);
+            var appUser = _mapper.Map<ApplicationUser>(createRequest);
 
-            var result = await _userManager.CreateAsync(appUser, user.Password);
+            var result = await _userManager.CreateAsync(appUser, createRequest.Password);
 
             if (!result.Succeeded)
             {
@@ -40,36 +40,13 @@ namespace VC.Services
                     sb.Append(error.Description + "\n");
                 }
 
-                throw new AppException(sb.ToString());
+                throw new ApplicationException(sb.ToString());
             }
 
             _emailService.SendConfirmationLetterAsync(
                 appUser.Email,
                 appUser.Id.ToString(),
                 await _userManager.GenerateEmailConfirmationTokenAsync(appUser));
-
-            return _mapper.Map<User>(appUser);
-        }
-
-        public async Task DeleteUserAsync(string id)
-        {
-            var appUser = await GetAppUserAsync(id);
-
-            await _userManager.DeleteAsync(appUser);
-        }
-
-        public async Task<User> UpdateUserAsync(string id, UserUpdateRequestDTO userRequest)
-        {
-            var appUser = await GetAppUserAsync(id);
-
-            _mapper.Map(userRequest, appUser);
-
-            var result = await _userManager.UpdateAsync(appUser);
-
-            if (!result.Succeeded)
-            {
-                throw new AppException();
-            }
 
             return _mapper.Map<User>(appUser);
         }
@@ -93,6 +70,30 @@ namespace VC.Services
 
             return _mapper.Map<List<User>>(appUsers);
         }
+
+        public async Task<User> UpdateUserAsync(string id, UserUpdateRequestDTO userRequest)
+        {
+            var appUser = await GetAppUserAsync(id);
+
+            _mapper.Map(userRequest, appUser);
+
+            var result = await _userManager.UpdateAsync(appUser);
+
+            if (!result.Succeeded)
+            {
+                throw new ApplicationException();
+            }
+
+            return _mapper.Map<User>(appUser);
+        }
+
+        public async Task DeleteUserAsync(string id)
+        {
+            var appUser = await GetAppUserAsync(id);
+
+            await _userManager.DeleteAsync(appUser);
+        }
+
 
         // helper methods
 

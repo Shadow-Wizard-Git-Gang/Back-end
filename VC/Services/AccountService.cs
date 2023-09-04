@@ -91,7 +91,7 @@ namespace VC.Services
 
             if (appUser == null)
             {
-                throw new AppException("The link could not be sent to your email, please try again.");
+                throw new ApplicationException("The link could not be sent to your email, please try again.");
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(appUser);
@@ -118,7 +118,7 @@ namespace VC.Services
                     sb.Append(error.Description + "\n");
                 }
 
-                throw new AppException(sb.ToString());
+                throw new ApplicationException(sb.ToString());
             }
         }
     }
