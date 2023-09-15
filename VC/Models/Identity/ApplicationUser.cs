@@ -10,7 +10,7 @@ namespace VC.Models.Identity
     public class ApplicationUser : MongoIdentityUser<ObjectId>
     {
         public string FullName { get; set; } = null!;
-        public int CompanyId { get; set; }
+        public string CompanyId { get; set; }
         public bool IsOwner { get; set; }
     }
 }

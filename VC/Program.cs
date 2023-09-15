@@ -22,9 +22,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var mongoDbConfig = builder.Configuration.GetSection(nameof(MongoDbConfig)).Get<MongoDbConfig>();
+var mongoDbSection = builder.Configuration.GetSection(nameof(MongoDbConfig));
+var mongoDbConfig = mongoDbSection.Get<MongoDbConfig>();
 
-builder.Services.Configure<MongoDbConfig>(builder.Configuration.GetSection(nameof(MongoDbConfig)));
+builder.Services.Configure<MongoDbConfig>(mongoDbSection);
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection(nameof(SmtpSettings)));
 
 var mongoDbContext = new ApplicationMongoDbContext(mongoDbConfig);

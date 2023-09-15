@@ -12,7 +12,7 @@ namespace VC.Models.DTOs.UserDTOs
         public string FullName { get; set; }
 
         [Required]
-        public int CompanyId { get; set; }
+        public string CompanyId { get; set; }
 
         [Required]
         public bool IsOwner { get; set; }
