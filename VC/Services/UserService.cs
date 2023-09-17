@@ -43,7 +43,7 @@ namespace VC.Services
                 throw new ApplicationException(sb.ToString());
             }
 
-            _emailService.SendConfirmationLetterAsync(
+            await _emailService.SendConfirmationLetterAsync(
                 appUser.Email,
                 appUser.Id.ToString(),
                 await _userManager.GenerateEmailConfirmationTokenAsync(appUser));

@@ -95,7 +95,7 @@ namespace VC.Services
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(appUser);
-            _emailService.SendPasswordResettingLetterAsync(email, appUser.Id.ToString(), token);
+            await _emailService.SendPasswordResettingLetterAsync(email, appUser.Id.ToString(), token);
         }
 
         public async Task SetNewPassword(string userId, string token, string password)
