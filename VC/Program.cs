@@ -1,7 +1,6 @@
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MongoDbGenericRepository;
 using System.Text;
@@ -26,7 +25,6 @@ var mongoDbSection = builder.Configuration.GetSection(nameof(MongoDbConfig));
 var mongoDbConfig = mongoDbSection.Get<MongoDbConfig>();
 
 builder.Services.Configure<MongoDbConfig>(mongoDbSection);
-builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection(nameof(SmtpSettings)));
 
 var mongoDbContext = new ApplicationMongoDbContext(mongoDbConfig);
 builder.Services.AddSingleton<IMongoDbContext>(mongoDbContext);
@@ -39,7 +37,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options => {
-    options.TokenLifespan = TimeSpan.FromHours(3);
+    options.TokenLifespan = TimeSpan.FromHours(int.Parse(builder.Configuration["IdentityTokenLifetime"]));
 });
 
 builder.Services.AddAuthentication(options => 
@@ -64,6 +62,16 @@ builder.Services.AddAuthorization();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
 
+builder.Services.AddMassTransit(x => {
+    x.UsingRabbitMq((context, configuration) => {
+        configuration.Host(builder.Configuration["RabbitMqSettings:Host"], "/", h => {
+            h.Username(builder.Configuration["RabbitMqSettings:Username"]);
+            h.Password(builder.Configuration["RabbitMqSettings:Password"]);
+        });
+        configuration.ConfigureEndpoints(context);
+    });
+});
+
 //Services
 builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddTransient<IUserService, UserService>();
@@ -74,7 +82,6 @@ builder.Services.AddTransient<ICompanyService, CompanyService>();
 builder.Services.AddTransient<ICompanyRepository, CompanyRepository>();
 
 // Configure the HTTP request pipeline.
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

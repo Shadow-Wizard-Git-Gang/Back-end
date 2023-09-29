@@ -1,4 +1,4 @@
-﻿namespace VC.Data
+﻿namespace Mail.Data
 {
     public class SmtpSettings
     {
